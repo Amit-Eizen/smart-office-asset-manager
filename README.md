@@ -135,13 +135,6 @@ dotnet test
 
 ### AI Tools Used
 - **Claude AI (Anthropic)** - Code generation, debugging assistance, and documentation
-
-### External Resources
-- **Stack Overflow** - Researching MongoDB mocking patterns and EF Core in-memory testing
-- **Microsoft Docs** - .NET 9, Entity Framework Core, and ASP.NET Core authentication documentation
-- **MongoDB Documentation** - MongoDB.Driver C# usage and best practices
-- **JWT.io** - Token debugging and validation
-
 ### NuGet Packages
 - `Microsoft.AspNetCore.Authentication.JwtBearer` - JWT authentication
 - `Microsoft.EntityFrameworkCore.SqlServer` - SQL Server provider
