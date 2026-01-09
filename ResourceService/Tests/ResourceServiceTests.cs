@@ -75,7 +75,5 @@ namespace Tests
                 default
             ), Times.Once);
         }
-
     }
-
 }
