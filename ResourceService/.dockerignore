@@ -1,0 +1,27 @@
+# Build artifacts
+bin/
+obj/
+out/
+
+# IDE folders
+.vs/
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Tests
+Tests/
+
+# Docker
+Dockerfile
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
