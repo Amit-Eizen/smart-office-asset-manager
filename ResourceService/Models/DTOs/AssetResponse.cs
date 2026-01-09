@@ -1,17 +1,12 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
-namespace ResourceService.Models.Entities
+
+namespace ResourceService.Models.DTOs
 {
-    public class Asset
+    public class AssetResponse
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public string Status { get; set; } = "Available";
     }
 }
-
-    
