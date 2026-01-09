@@ -196,9 +196,89 @@ AuthService/
 
 ---
 
+---
+
+## 🐋 Running with Docker (Recommended)
+
+### Prerequisites
+
+1. **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop/)
+   - Verify installation: `docker --version` and `docker-compose --version`
+2. **Git** - [Download here](https://git-scm.com/)
+
+### Quick Start with Docker
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd smart-office-asset-manager
+
+# Run the entire stack
+docker-compose --env-file .env.dev up --build
+```
+
+This single command will:
+- Start SQL Server container
+- Start MongoDB container
+- Build and start AuthService container
+- Build and start ResourceService container
+- Create all necessary databases automatically
+- Set up networking between services
+
+### Available Environments
+
+The project includes three environment configurations:
+
+- `.env.dev` - Development environment
+- `.env.test` - Testing environment
+- `.env.prod` - Production environment
+
+To use a different environment:
+```bash
+docker-compose --env-file .env.test up --build
+```
+
+### Testing the Docker Setup
+
+**Register a new user:**
+```powershell
+Invoke-RestMethod -Uri "http://localhost:5000/register" -Method POST -ContentType "application/json" -Body '{"username":"admin","password":"Admin123!","role":"Admin"}'
+```
+
+**Create an asset:**
+```powershell
+$token = "YOUR_JWT_TOKEN_HERE"
+Invoke-RestMethod -Uri "http://localhost:5001/assets" -Method POST -ContentType "application/json" -Headers @{Authorization="Bearer $token"} -Body '{"name":"Laptop","type":"Electronics","status":"Available"}'
+```
+
+### Stopping Docker Containers
+
+```bash
+# Stop containers (keeps data)
+docker-compose down
+
+# Stop containers and delete all data
+docker-compose down -v
+```
+
+### Accessing Databases
+
+**SQL Server:**
+- Server: `localhost,1433`
+- Username: `sa`
+- Password: Check your `.env.dev` file (default: `Dev@Password123`)
+- Database: `SmartOfficeAuth_Dev`
+
+**MongoDB:**
+- Connection string: `mongodb://localhost:27017`
+- Database: `SmartOfficeDB_Dev`
+- Use MongoDB Compass to view data
+
+---
+
 ## TODO
 
 - [x] Complete AuthService
-- [ ] Build ResourceService
+- [x] Build ResourceService
+- [x] Docker Compose setup
 - [ ] Build Frontend
-- [ ] Docker Compose setup
