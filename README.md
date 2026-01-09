@@ -1,200 +1,135 @@
 # Smart Office Asset Manager
 
-Microservices-based asset management system built with .NET 9, React, and Docker.
+A microservices-based asset management system with JWT authentication and role-based authorization.
 
 ## Architecture
 
-- **AuthService** - .NET 9 Web API + SQL Server (Authentication & JWT)
-- **ResourceService** - .NET 9 Web API + MongoDB (Asset Management)
-- **Frontend** - React + TypeScript + MobX + MUI 5
+- **AuthService** - .NET 9 Web API + SQL Server (User authentication & JWT tokens)
+- **ResourceService** - .NET 9 Web API + MongoDB (Asset management with role-based access)
+- **Frontend** - React + TypeScript + MobX + MUI 5 (Coming soon)
 
----
-
-## 🚀 Quick Start Guide (Step by Step)
+## Run Guide
 
 ### Prerequisites
 
-Before you start, make sure you have installed:
+1. [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+2. SQL Server (Express/LocalDB)
+3. MongoDB Community Edition
 
-1. **.NET 9 SDK** - [Download here](https://dotnet.microsoft.com/download/dotnet/9.0)
-   - Verify installation: `dotnet --version` (should show 9.x.x)
-
-2. **SQL Server** - One of these options:
-   - SQL Server Express (recommended) - [Download here](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-   - SQL Server Developer Edition
-   - SQL Server LocalDB
-
-3. **Git** - [Download here](https://git-scm.com/)
-
----
-
-## 📦 Setup Instructions
-
-### Step 1: Clone the Repository
+### Step 1: Setup AuthService
 
 ```bash
-git clone <repository-url>
-cd smart-office-asset-manager
-```
-
-### Step 2: Restore NuGet Packages
-
-```bash
+# Navigate to AuthService
 cd AuthService
-dotnet restore
-```
 
-This will download all required packages (Entity Framework, JWT, BCrypt, etc.)
+# Create database
+dotnet ef database update
 
-### Step 3: Create Configuration File
-
-Create a new file `AuthService/appsettings.json` with this content:
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "AllowedHosts": "*",
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=SmartOfficeAuth;Trusted_Connection=True;TrustServerCertificate=True;"
-  },
-  "Jwt": {
-    "Secret": "YOUR_SECRET_KEY_AT_LEAST_32_CHARACTERS",
-    "Issuer": "AuthService",
-    "Audience": "SmartOfficeSystem",
-    "ExpiryInMinutes": "15"
-  }
-}
-```
-
-**Important:** Replace `YOUR_SERVER_NAME` with your SQL Server instance name:
-- Examples: `localhost`, `localhost\SQLEXPRESS`, `YOUR-PC-NAME\SQLEXPRESS`
-- To find your server name, open SQL Server Management Studio and check the connection dialog
-
-### Step 4: Run the Application
-
-```bash
+# Run the service
 dotnet run
 ```
 
-**What happens automatically:**
-- The database `SmartOfficeAuth` will be created
-- Tables `Users` and `RefreshTokens` will be created
-- The API will start on `http://localhost:5000` or `https://localhost:5001`
+AuthService will run on `http://localhost:5000`
 
-### Step 5: Test the API
+### Step 2: Setup ResourceService
 
-You can test the endpoints using:
-- Postman
-- curl
-- The built-in Swagger UI at `https://localhost:5001/swagger`
+Make sure MongoDB is running on `mongodb://localhost:27017`
 
----
+```bash
+# Navigate to ResourceService
+cd ResourceService
 
-## 🔧 AuthService API Endpoints
+# Run the service
+dotnet run
+```
+ResourceService will run on `http://localhost:5001`
 
-### 1. Register a New User
+### Step 3: Test the System
 
-**POST** `/register`
+**1. Register an Admin user:**
+```bash
+curl -X POST http://localhost:5000/register \
+  -H "Content-Type: application/json" \
+  -d '{"userName":"admin","password":"Admin123!","role":"Admin"}'
+```
+**2. Copy the token from the response**
 
-```json
-{
-  "username": "admin",
-  "password": "Admin123!",
-  "role": "Admin"
-}
+**3. View all assets (works for all users):**
+```bash
+curl -X GET http://localhost:5001/assets \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-Response:
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "refreshToken": "550e8400-e29b-41d4-a716-446655440000",
-  "expiresAt": "2024-01-01T12:15:00Z"
-}
+**4. Create a new asset (Admin only):**
+```bash
+curl -X POST http://localhost:5001/assets \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Laptop","type":"Electronics","status":"Available"}'
 ```
 
-### 2. Login
+**5. Test Member role (should get 403 Forbidden):**
+```bash
+# Register a Member user
+curl -X POST http://localhost:5000/register \
+  -H "Content-Type: application/json" \
+  -d '{"userName":"member","password":"Member123!","role":"Member"}'
 
-**POST** `/login`
-
-```json
-{
-  "username": "admin",
-  "password": "Admin123!"
-}
+# Try to create asset with Member token (should fail)
+curl -X POST http://localhost:5001/assets \
+  -H "Authorization: Bearer MEMBER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Chair","type":"Furniture","status":"Available"}'
 ```
-
-Response: Same as register
-
----
-
-## 🛠️ Troubleshooting
-
-### Problem: "Could not connect to SQL Server"
-- Make sure SQL Server is running
-- Check your connection string in `appsettings.json`
-- Verify server name: Open SQL Server Management Studio to see the correct server name
-
-### Problem: "appsettings.json not found"
-- This file is not in git (for security reasons)
-- You must create it manually following Step 3 above
-
-### Problem: Database already exists error
-- The app will automatically create the database
-- If you need to reset: Open SSMS and delete the `SmartOfficeAuth` database
-
----
-
-## 📝 Development Notes
 
 ### Running Tests
 
 ```bash
+# AuthService tests
 cd AuthService/Tests
+dotnet test
+
+# ResourceService tests
+cd ResourceService/Tests
 dotnet test
 ```
 
-All 5 unit tests should pass.
+## API Endpoints
 
-### Project Structure
+### AuthService (`http://localhost:5000`)
 
-```
-AuthService/
-├── Controllers/
-│   └── AuthController.cs       # API endpoints
-├── Data/
-│   └── AppDbContext.cs         # EF Core database context
-├── Models/
-│   ├── Entities/
-│   │   ├── User.cs             # User entity
-│   │   └── RefreshToken.cs     # Refresh token entity
-│   └── DTOs/
-│       ├── RegisterRequest.cs
-│       ├── LoginRequest.cs
-│       └── LoginResponse.cs
-├── Services/
-│   └── AuthService.cs          # Authentication logic
-├── Migrations/                  # EF Core migrations
-├── Tests/                       # Unit tests
-├── Program.cs                   # Application entry point
-└── appsettings.json            # Configuration (not in git)
-```
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/register` | Register new user | No |
+| POST | `/login` | Login and get JWT token | No |
 
----
+### ResourceService (`http://localhost:5001`)
 
-## 🔐 Security Notes
+| Method | Endpoint | Description | Auth Required | Role Required |
+|--------|----------|-------------|---------------|---------------|
+| GET | `/assets` | Get all assets | Yes | Any |
+| POST | `/assets` | Create new asset | Yes | Admin |
 
-- JWT tokens expire after 15 minutes
-- Refresh tokens expire after 7 days
-- Passwords are hashed using BCrypt
-- `appsettings.json` is excluded from git to protect secrets
+## Reflections
 
----
+### Technical Challenges & Solutions
+
+**1. MongoDB Mocking in Unit Tests**
+- **Challenge:** MongoDB's `IMongoCollection<T>` is difficult to mock because `FindAsync` returns an `IAsyncCursor<T>`.
+- **Solution:** Created a protected parameterless constructor in `MongoDbContext` specifically for Moq, and mocked both the cursor and its `MoveNextAsync`/`Current` behavior.
+
+**2. JWT Token Validation Between Services**
+- **Challenge:** ResourceService needed to validate JWT tokens issued by AuthService without direct communication.
+- **Solution:** Shared the same JWT secret, issuer, and audience in both services' `appsettings.json`. This allows ResourceService to independently verify tokens using the same signing key.
+
+**3. Role-Based Authorization**
+- **Challenge:** Implementing authorization so only Admins can create assets.
+- **Solution:** Used the `[Authorize(Roles = "Admin")]` attribute on the POST endpoint. JWT tokens contain the role claim, and ASP.NET Core automatically validates it.
+
+**4. Entity Framework In-Memory Database for Tests**
+- **Challenge:** Using a real SQL Server database for tests would be slow and require cleanup.
+- **Solution:** Used `Microsoft.EntityFrameworkCore.InMemory` provider to create isolated, fast tests that don't persist data.
+
 
 ---
 
