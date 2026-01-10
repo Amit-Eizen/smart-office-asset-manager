@@ -248,4 +248,4 @@ docker-compose down -v
 - [x] Complete AuthService
 - [x] Build ResourceService
 - [x] Docker Compose setup
-- [ ] Build Frontend
+- [x] Build Frontend
