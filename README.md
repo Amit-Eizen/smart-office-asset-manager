@@ -16,27 +16,31 @@ A microservices-based asset management system with JWT authentication and role-b
 2. SQL Server (Express/LocalDB)
 3. MongoDB Community Edition
 
-### Step 1: Setup AuthService
+### Step 1: Setup Services
 
 ```bash
 # Navigate to AuthService
-cd AuthService
+cd Server/AuthService
+dotnet restore
+
+# Navigate to ResourceService
+cd ../ResourceService
 dotnet restore
 ```
 
 This will download all required packages (Entity Framework, JWT, BCrypt, etc.)
 
-### Step 3: Create Configuration Files
+### Step 2: Create Configuration Files
 
 ```bash
-# Copy the example configuration files
-copy AuthService\appsettings.example.json AuthService\appsettings.json
-copy ResourceService\appsettings.example.json ResourceService\appsettings.json
+# Copy the example configuration files (from project root)
+copy Server\AuthService\appsettings.example.json server\AuthService\appsettings.json
+copy Server\ResourceService\appsettings.example.json server\ResourceService\appsettings.json
 ```
 
 **Then edit both files and replace the placeholder values:**
 
-For `AuthService/appsettings.json`:
+For `Server/AuthService/appsettings.json`:
 - Replace `*YourServerName*` with your SQL Server instance (e.g., `localhost`, `localhost\SQLEXPRESS`)
 - Replace `*YourDatabaseName*` with `SmartOfficeAuth`
 - Replace `*YourJwtSecretKeyAtLeast32Characters*` with a random string (at least 32 characters)
@@ -44,21 +48,24 @@ For `AuthService/appsettings.json`:
 - Replace `*WhoIsTheTokenFor*` with `SmartOfficeSystem`
 - Replace `*TokenExpiryInMinutes*` with `15`
 
-For `ResourceService/appsettings.json`:
+For `Server/ResourceService/appsettings.json`:
 - Replace `*YourMongoDbConnectionString*` with `mongodb://localhost:27017/`
 - Replace `*YourMongoDatabaseName*` with `SmartOfficeDB`
 - Use the same JWT values as AuthService (Secret, Issuer, Audience, ExpiryInMinutes)
 
-### Step 4: Run the Application
+### Step 3: Run the Application
 
 ```bash
-# Navigate to ResourceService
-cd ResourceService
+# Run AuthService
+cd Server/AuthService
+dotnet run
 
-# Run the service
+# In another terminal, run ResourceService
+cd Server/ResourceService
 dotnet run
 ```
-ResourceService will run on `http://localhost:5001`
+- AuthService will run on `http://localhost:5000`
+- ResourceService will run on `http://localhost:5001`
 
 ### Step 3: Test the System
 
