@@ -53,20 +53,6 @@ For `Server/ResourceService/appsettings.json`:
 - Replace `*YourMongoDatabaseName*` with `SmartOfficeDB`
 - Use the same JWT values as AuthService (Secret, Issuer, Audience, ExpiryInMinutes)
 
-### Step 3: Run the Application
-
-```bash
-# Run AuthService
-cd Server/AuthService
-dotnet run
-
-# In another terminal, run ResourceService
-cd Server/ResourceService
-dotnet run
-```
-- AuthService will run on `http://localhost:5000`
-- ResourceService will run on `http://localhost:5001`
-
 ### Step 3: Test the System
 
 **1. Register an Admin user:**
