@@ -26,7 +26,7 @@ services:
 
   authservice:
     build:
-      context: ./AuthService
+      context: ./Server/AuthService
       dockerfile: Dockerfile
     container_name: smartoffice-authservice
     environment:
@@ -45,7 +45,7 @@ services:
 
   resourceservice:
     build:
-      context: ./ResourceService
+      context: ./Server/ResourceService
       dockerfile: Dockerfile
     container_name: smartoffice-resourceservice
     environment:
