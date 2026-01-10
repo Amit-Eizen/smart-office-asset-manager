@@ -5,6 +5,7 @@ import type { LoginRequest, RegisterRequest } from "../types";
 class AuthStore {
     token: string | null = null;
     userId: string | null = null;
+    username: string | null = null;
     role: 'Admin' | 'Member' | null = null;
     isAuthenticated: boolean = false;
     isInitialized: boolean = false;
@@ -27,7 +28,8 @@ class AuthStore {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             this.userId = payload.sub || payload.nameid;
-            this.role = payload.role;
+            this.username = payload.name || payload.unique_name;
+            this.role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
             this.isAuthenticated = true;
         } catch (error) {
             console.error("Failed to decode token:", error);
@@ -62,6 +64,7 @@ class AuthStore {
     logout() {
         this.token = null;
         this.userId = null;
+        this.username = null;
         this.role = null;
         this.isAuthenticated = false;
         localStorage.removeItem("token");

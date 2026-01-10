@@ -37,7 +37,7 @@ const Dashboard = observer(() => {
                         Smart Office Asset Manager
                     </Typography>
                     <Typography sx={{ marginRight: 2 }}>
-                        {authStore.role}: {authStore.userId}
+                        {authStore.role}: {authStore.username}
                     </Typography>
                     <Button color="inherit" onClick={handleLogout}>Logout</Button>
                 </Toolbar>

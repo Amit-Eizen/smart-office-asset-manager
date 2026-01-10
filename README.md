@@ -6,7 +6,7 @@ A microservices-based asset management system with JWT authentication and role-b
 
 - **AuthService** - .NET 9 Web API + SQL Server (User authentication & JWT tokens)
 - **ResourceService** - .NET 9 Web API + MongoDB (Asset management with role-based access)
-- **Frontend** - React + TypeScript + MobX + MUI 5 (Coming soon)
+- **Frontend** - React + TypeScript + MobX + MUI 5 (Dashboard with role-based UI)
 
 ## Run Guide
 
@@ -153,6 +153,18 @@ dotnet test
 - **Challenge:** Using a real SQL Server database for tests would be slow and require cleanup.
 - **Solution:** Used `Microsoft.EntityFrameworkCore.InMemory` provider to create isolated, fast tests that don't persist data.
 
+**5. CORS Configuration for Docker**
+- **Challenge:** Frontend running on `localhost:5173` couldn't access backend services in Docker due to CORS policy blocking cross-origin requests.
+- **Solution:** Added CORS configuration to both services in `Program.cs` and `docker-compose.yml`, allowing requests from the frontend origin. The CORS middleware must be placed **after** `UseRouting()` and **before** `UseAuthentication()` for proper request flow.
+
+**6. JWT Claims Mapping in Frontend**
+- **Challenge:** .NET uses long URI-based claim names (e.g., `http://schemas.microsoft.com/ws/2008/06/identity/claims/role`) instead of simple names like `role`.
+- **Solution:** Updated the frontend `decodeToken()` method to check for both simple claim names and Microsoft's URI-based claim names using the `||` operator as a fallback mechanism.
+
+**7. F5 Logout Issue (Page Refresh)**
+- **Challenge:** Users would get logged out when refreshing the page (F5) because the authentication state wasn't persisted.
+- **Solution:** Implemented an `isInitialized` flag in AuthStore that prevents redirects until localStorage is checked. The `checkAuth()` method runs in the constructor to load the token before any routing decisions are made.
+
 
 ---
 
@@ -178,8 +190,13 @@ copy .env.example .env.dev
 # - Change SQL_SERVER_PASSWORD to a strong password
 # - Change JWT_SECRET to a random string (at least 32 characters)
 
-# 4. Run the entire stack
+# 4. Run the backend services
 docker-compose --env-file .env.dev up --build
+
+# 5. In a separate terminal, run the frontend
+cd Client
+npm install
+npm run dev
 ```
 
 **IMPORTANT:** The `.env.dev` file is not in git for security reasons. You must create it from the `.env.example` template and set your own passwords.
@@ -240,6 +257,42 @@ docker-compose down -v
 - Connection string: `mongodb://localhost:27017`
 - Database: `SmartOfficeDB_Dev`
 - Use MongoDB Compass to view data
+
+---
+
+## Tooling Disclosure
+
+This project was developed with assistance from the following AI tools and resources:
+
+### AI Tools Used:
+- **Claude (Anthropic)** - Used extensively for:
+  - Architecture design and planning
+  - Code generation and debugging
+  - Best practices guidance for .NET, React, and Docker
+  - Writing comprehensive tests
+  - Documentation and README creation
+
+### External Resources:
+- **Microsoft Documentation** - .NET 9, Entity Framework Core, ASP.NET Core Authentication
+- **MongoDB Documentation** - MongoDB.Driver for .NET
+- **React Documentation** - React Hooks, TypeScript integration
+- **MobX Documentation** - State management patterns
+- **MUI (Material-UI) Documentation** - Component usage and styling
+- **Stack Overflow** - Specific troubleshooting for JWT claims mapping and CORS configuration
+
+### Code Ownership:
+While AI tools were used to assist in development, all code has been:
+- Reviewed and understood by the developer
+- Tested thoroughly with unit tests
+- Integrated manually into the project architecture
+- Modified to fit specific project requirements
+
+The developer is fully capable of explaining:
+- JWT validation flow between microservices
+- Role-based authorization implementation
+- Docker networking and container orchestration
+- React state management with MobX
+- Database isolation patterns (SQL Server vs MongoDB)
 
 ---
 
