@@ -21,19 +21,35 @@ A microservices-based asset management system with JWT authentication and role-b
 ```bash
 # Navigate to AuthService
 cd AuthService
-
-# Create database
-dotnet ef database update
-
-# Run the service
-dotnet run
+dotnet restore
 ```
 
-AuthService will run on `http://localhost:5000`
+This will download all required packages (Entity Framework, JWT, BCrypt, etc.)
 
-### Step 2: Setup ResourceService
+### Step 3: Create Configuration Files
 
-Make sure MongoDB is running on `mongodb://localhost:27017`
+```bash
+# Copy the example configuration files
+copy AuthService\appsettings.example.json AuthService\appsettings.json
+copy ResourceService\appsettings.example.json ResourceService\appsettings.json
+```
+
+**Then edit both files and replace the placeholder values:**
+
+For `AuthService/appsettings.json`:
+- Replace `*YourServerName*` with your SQL Server instance (e.g., `localhost`, `localhost\SQLEXPRESS`)
+- Replace `*YourDatabaseName*` with `SmartOfficeAuth`
+- Replace `*YourJwtSecretKeyAtLeast32Characters*` with a random string (at least 32 characters)
+- Replace `*WhoCreatesTheToken*` with `AuthService`
+- Replace `*WhoIsTheTokenFor*` with `SmartOfficeSystem`
+- Replace `*TokenExpiryInMinutes*` with `15`
+
+For `ResourceService/appsettings.json`:
+- Replace `*YourMongoDbConnectionString*` with `mongodb://localhost:27017/`
+- Replace `*YourMongoDatabaseName*` with `SmartOfficeDB`
+- Use the same JWT values as AuthService (Secret, Issuer, Audience, ExpiryInMinutes)
+
+### Step 4: Run the Application
 
 ```bash
 # Navigate to ResourceService
@@ -144,13 +160,22 @@ dotnet test
 ### Quick Start with Docker
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone <repository-url>
 cd smart-office-asset-manager
 
-# Run the entire stack
+# 2. Create environment configuration from template
+copy .env.example .env.dev
+
+# 3. Edit .env.dev and update the passwords (use any text editor)
+# - Change SQL_SERVER_PASSWORD to a strong password
+# - Change JWT_SECRET to a random string (at least 32 characters)
+
+# 4. Run the entire stack
 docker-compose --env-file .env.dev up --build
 ```
+
+**IMPORTANT:** The `.env.dev` file is not in git for security reasons. You must create it from the `.env.example` template and set your own passwords.
 
 This single command will:
 - Start SQL Server container
