@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { resourceService } from "../services/resourceService";
 import type { Asset, CreateAssetRequest } from "../types";
-import { authStore } from "./AuthStore";
 
 export class AssetStore {
     assets: Asset[] = [];
@@ -13,15 +12,10 @@ export class AssetStore {
     }
 
     async fetchAssets() {
-        if(!authStore.token) {
-            this.error = "Not authenticated";
-            return;
-        }
-
         this.loading = true;
         this.error = null;
         try {
-            const existingAssets = await resourceService.getAssets(authStore.token);
+            const existingAssets = await resourceService.getAssets();
             runInAction(() => {
                 this.assets = existingAssets;
                 this.loading = false;
@@ -35,16 +29,11 @@ export class AssetStore {
     }
 
     async createAsset(data: CreateAssetRequest) {
-        if(!authStore.token) {
-            this.error = "Not authenticated";
-            return;
-        }
-
         this.loading = true;
         this.error = null;
 
         try {
-            const newAsset = await resourceService.createAsset(authStore.token, data);
+            const newAsset = await resourceService.createAsset(data);
             runInAction(() => {
                 this.assets.push(newAsset);
                 this.loading = false;
@@ -55,6 +44,10 @@ export class AssetStore {
                 this.loading = false;
             });
         }
+    }
+
+    clearError() {
+        this.error = null;
     }
 }
 

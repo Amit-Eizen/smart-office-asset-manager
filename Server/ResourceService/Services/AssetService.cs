@@ -31,24 +31,47 @@ namespace ResourceService.Services
 
         public async Task<AssetResponse> CreateNewAsset(CreateAssetRequest request)
         {
-            var newAsset = new Asset
+            try
             {
-                Name = request.Name,
-                Type = request.Type,
-                Status = request.Status
-            };
+                if (string.IsNullOrWhiteSpace(request.Name))
+                {
+                    throw new ArgumentException("Asset name cannot be empty.");
+                }
 
-            await _context.Assets.InsertOneAsync(newAsset);
+                if (string.IsNullOrWhiteSpace(request.Type))
+                {
+                    throw new ArgumentException("Asset type cannot be empty.");
+                }
 
-            var response = new AssetResponse
+                if (string.IsNullOrWhiteSpace(request.Status))
+                {
+                    throw new ArgumentException("Asset status cannot be empty.");
+                }
+            
+                var newAsset = new Asset
+                {
+                    Name = request.Name,
+                    Type = request.Type,
+                    Status = request.Status
+                };
+
+                await _context.Assets.InsertOneAsync(newAsset);
+
+                var response = new AssetResponse
+                {
+                    Id = newAsset.Id,
+                    Name = newAsset.Name,
+                    Type = newAsset.Type,
+                    Status = newAsset.Status
+                };
+
+                return response;
+            }
+            catch (Exception ex)
             {
-                Id = newAsset.Id,
-                Name = newAsset.Name,
-                Type = newAsset.Type,
-                Status = newAsset.Status
-            };
-
-            return response;
+                Console.WriteLine($"Error in CreateNewAsset: {ex.Message}");
+                throw; 
+            }
         }
     }
 }
