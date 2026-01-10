@@ -24,6 +24,22 @@ namespace AuthService.Services
         {
             try
             {
+                request.UserName = request.UserName?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(request.UserName))
+                {
+                    throw new ArgumentException("Username cannot be empty.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Password))
+                {
+                    throw new ArgumentException("Password cannot be empty.");
+                }
+
+                if(request.Password.Length < 6)
+                {
+                    throw new ArgumentException("Password must be at least 6 characters long.");
+                }
+
                 var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.UserName);
                 if (existingUser != null)
                 {
@@ -64,6 +80,17 @@ namespace AuthService.Services
         {
             try
             {
+                request.UserName = request.UserName?.Trim() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(request.UserName))
+                {
+                    throw new ArgumentException("Username cannot be empty.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Password))
+                {
+                    throw new ArgumentException("Password cannot be empty.");
+                }
+                
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.UserName);
                 if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 {
@@ -131,6 +158,42 @@ namespace AuthService.Services
             await _context.SaveChangesAsync();
 
             return refreshToken; 
-        } 
+        }
+
+        public async Task<LoginResponse?> RefreshTokenAsync(string refreshToken)
+        {
+            try
+            {
+                var storedToken = await _context.RefreshTokens
+                    .Include(rt => rt.User)
+                    .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
+
+                if (storedToken == null || storedToken.ExpiresAt < DateTime.UtcNow)
+                {
+                    return null; // Invalid or expired refresh token
+                }
+
+                var user = storedToken.User;
+                var newAccessToken = GenerateJwtToken(user);
+                var newRefreshToken = await GenerateRefreshToken(user);
+
+                _context.RefreshTokens.Remove(storedToken);
+                await _context.SaveChangesAsync();
+
+                return new LoginResponse
+                {
+                    Token = newAccessToken,
+                    RefreshToken = newRefreshToken,
+                    UserId = user.Id,
+                    UserName = user.Username,
+                    Role = user.Role
+                };
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in RefreshTokenAsync: {ex.Message}");
+                throw; 
+            }
+        }
     }
 }

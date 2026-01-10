@@ -30,7 +30,7 @@ namespace AuthService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {message = "Internal server error", error = ex.Message});
+                return StatusCode(500, new {message = "An error occurred while registering. Please try again.", error = ex.Message});
             }
         }
 
@@ -48,7 +48,25 @@ namespace AuthService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new {message = "Internal server error", error = ex.Message});
+                return StatusCode(500, new {message = "An error occurred while logging in. Please try again.", error = ex.Message});
+            }
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            try
+            {
+                var response = await _authService.RefreshTokenAsync(refreshToken);
+                if (response == null)
+                {
+                    return BadRequest("Invalid or expired refresh token.");
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {message = "An error occurred while refreshing token.", error = ex.Message});
             }
         }
 

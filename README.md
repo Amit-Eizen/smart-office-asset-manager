@@ -190,13 +190,8 @@ copy .env.example .env.dev
 # - Change SQL_SERVER_PASSWORD to a strong password
 # - Change JWT_SECRET to a random string (at least 32 characters)
 
-# 4. Run the backend services
+# 4. Run the entire stack
 docker-compose --env-file .env.dev up --build
-
-# 5. In a separate terminal, run the frontend
-cd Client
-npm install
-npm run dev
 ```
 
 **IMPORTANT:** The `.env.dev` file is not in git for security reasons. You must create it from the `.env.example` template and set your own passwords.
@@ -206,8 +201,14 @@ This single command will:
 - Start MongoDB container
 - Build and start AuthService container
 - Build and start ResourceService container
+- Build and start Frontend container (React app served with nginx)
 - Create all necessary databases automatically
 - Set up networking between services
+
+Once all containers are running, open your browser and navigate to:
+- **Frontend**: http://localhost:5173
+- **AuthService API**: http://localhost:5000
+- **ResourceService API**: http://localhost:5001
 
 ### Available Environments
 
@@ -266,10 +267,8 @@ This project was developed with assistance from the following AI tools and resou
 
 ### AI Tools Used:
 - **Claude (Anthropic)** - Used extensively for:
-  - Architecture design and planning
   - Code generation and debugging
   - Best practices guidance for .NET, React, and Docker
-  - Writing comprehensive tests
   - Documentation and README creation
 
 ### External Resources:
@@ -278,7 +277,6 @@ This project was developed with assistance from the following AI tools and resou
 - **React Documentation** - React Hooks, TypeScript integration
 - **MobX Documentation** - State management patterns
 - **MUI (Material-UI) Documentation** - Component usage and styling
-- **Stack Overflow** - Specific troubleshooting for JWT claims mapping and CORS configuration
 
 ### Code Ownership:
 While AI tools were used to assist in development, all code has been:
@@ -294,11 +292,3 @@ The developer is fully capable of explaining:
 - React state management with MobX
 - Database isolation patterns (SQL Server vs MongoDB)
 
----
-
-## TODO
-
-- [x] Complete AuthService
-- [x] Build ResourceService
-- [x] Docker Compose setup
-- [x] Build Frontend

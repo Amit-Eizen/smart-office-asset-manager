@@ -1,6 +1,16 @@
 import { makeAutoObservable } from "mobx";
+import { jwtDecode } from "jwt-decode";
 import { authService } from "../services/authService";
 import type { LoginRequest, RegisterRequest } from "../types";
+
+interface JwtPayload {
+    sub?: string;
+    nameid?: string;
+    name?: string;
+    unique_name?: string;
+    role?: string;
+    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string;
+}
 
 class AuthStore {
     token: string | null = null;
@@ -26,10 +36,10 @@ class AuthStore {
 
     private decodeToken(token: string) {
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            this.userId = payload.sub || payload.nameid;
-            this.username = payload.name || payload.unique_name;
-            this.role = payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            const payload = jwtDecode<JwtPayload>(token);
+            this.userId = payload.sub || payload.nameid || null;
+            this.username = payload.name || payload.unique_name || null;
+            this.role = (payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || null) as 'Admin' | 'Member' | null;
             this.isAuthenticated = true;
         } catch (error) {
             console.error("Failed to decode token:", error);
